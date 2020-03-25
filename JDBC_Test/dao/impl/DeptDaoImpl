@@ -1,0 +1,72 @@
+package dao.impl;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+import dao.BaseDao;
+import dao.DeptDao;
+import entity.Dept;
+
+public class DeptDaoImpl extends BaseDao implements DeptDao{
+
+	Connection conn=null;
+	PreparedStatement pstmt=null;
+	ResultSet rs=null;
+	
+	public Dept login(String name, String password) {
+		Dept dept=null;
+		conn=this.getConnection();
+		String sql="SELECT deptNo,deptName,PASSWORD,address FROM dept WHERE deptName=? AND PASSWORD=?";
+		try {
+			pstmt=conn.prepareStatement(sql);
+			pstmt.setString(1,name);
+			pstmt.setString(2,password);
+			rs=pstmt.executeQuery();
+			while(rs.next()){
+				int deptNo=rs.getInt("deptNo");
+				String deptName=rs.getString("deptName");
+				String PASSWORD=rs.getString("PASSWORD");
+				String address=rs.getString("address");
+				dept=new Dept(deptNo, deptName, PASSWORD, address);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}finally{
+			this.closeAll(conn, pstmt, rs);
+		}
+		return dept;
+	}
+
+	public Dept getDept(String sql, Integer deptNo) {
+		Dept dpet=null;
+		conn=this.getConnection();
+		try {
+			pstmt=conn.prepareStatement(sql);
+			if (deptNo!=null) {
+				pstmt.setInt(1,deptNo);
+			}
+			rs=pstmt.executeQuery();
+			while(rs.next()){
+				int no=rs.getInt("deptNo");
+				String deptName=rs.getString("deptName");
+				String password=rs.getString("password");
+				String address=rs.getString("address");
+				dpet=new Dept(deptNo, deptName, password, address);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return dpet;
+	}
+	
+	@Override
+	public int deleteDept(int deptNo) {
+		String sql="DELETE FROM dept WHERE deptNo=?";
+		Object [] param={deptNo};
+		return this.executeUpdate(sql, param);
+	}
+	
+
+}
